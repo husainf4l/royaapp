@@ -24,7 +24,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const LiveViewScreen(),
+    LiveViewScreen(),
     const SmartReplayScreen(),
     const AICommentatorSettingsScreen(),
     const TacticalAnalysisScreen(),
