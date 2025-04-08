@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:royaapp/routes/app_routes.dart';
 import 'package:royaapp/Auth/auth_service.dart';
 import 'package:royaapp/theme/app_theme.dart';
+import 'dart:developer' as developer;
 
 // Initialize services before app starts
 Future<void> initServices() async {
@@ -16,6 +17,8 @@ void main() async {
 
   await initServices();
 
+  // Add this line for better debugging
+  developer.log("App starting", name: "init");
   runApp(const MyApp());
 }
 

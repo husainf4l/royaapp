@@ -37,7 +37,13 @@ dependencies:
   get: ^4.6.5
   get_storage: ^2.1.1
   google_fonts: ^6.2.1
-  video_player: ^2.9.5
+  video_player: ^2.7.0
+  chewie: ^1.7.0
+  web_socket_channel: ^2.4.0
+  camera: ^0.10.5+2
+  http: ^1.1.0
+  path_provider: ^2.1.0
+  fl_chart: ^0.63.0
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +64,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/pitch.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -67,20 +74,19 @@ flutter:
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
+  # "family" key with the font family name, and a "fonts" key with aing the asset and other descriptors for the font. For
+  # example:e:
   # fonts:
-  #   - family: Schyler
+  #   - family: Schyler: Schyler
   #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
+  #       - asset: fonts/Schyler-Regular.ttff
+  #       - asset: fonts/Schyler-Italic.ttfSchyler-Italic.ttf
   #         style: italic
-  #   - family: Trajan Pro
+  #   - family: Trajan Pro: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+  #       - asset: fonts/TrajanPro_Bold.ttfs/TrajanPro_Bold.ttf
+  #         weight: 700         weight: 700
   #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package
+  # For details regarding fonts from package dependencies,endencies,
+  # see https://flutter.dev/to/font-from-package  # see https://flutter.dev/to/font-from-package
