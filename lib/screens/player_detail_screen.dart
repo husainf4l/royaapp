@@ -4,7 +4,7 @@ import '../models/player_analysis.dart';
 class PlayerDetailScreen extends StatelessWidget {
   final PlayerAnalysis player;
 
-  const PlayerDetailScreen({Key? key, required this.player}) : super(key: key);
+  const PlayerDetailScreen({super.key, required this.player});
 
   @override
   Widget build(BuildContext context) {

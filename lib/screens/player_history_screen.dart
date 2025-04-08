@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/player_analysis.dart';
 
 class PlayerHistoryScreen extends StatefulWidget {
-  const PlayerHistoryScreen({Key? key}) : super(key: key);
+  const PlayerHistoryScreen({super.key});
 
   @override
   State<PlayerHistoryScreen> createState() => _PlayerHistoryScreenState();

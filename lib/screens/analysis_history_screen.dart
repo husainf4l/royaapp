@@ -3,7 +3,7 @@ import '../models/player_analysis.dart';
 import '../screens/player_detail_screen.dart';
 
 class AnalysisHistoryScreen extends StatefulWidget {
-  const AnalysisHistoryScreen({Key? key}) : super(key: key);
+  const AnalysisHistoryScreen({super.key});
 
   @override
   State<AnalysisHistoryScreen> createState() => _AnalysisHistoryScreenState();

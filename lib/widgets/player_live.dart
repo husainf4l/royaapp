@@ -26,7 +26,7 @@ class _PlayerLiveState extends State<PlayerLive> with TickerProviderStateMixin {
     super.initState();
     try {
       _controller = VideoPlayerController.asset(
-          'assets/images/b.mov', // Ensure this path is correct
+          'assets/images/1.mp4', // Ensure this path is correct
         )
         ..initialize()
             .then((_) {
@@ -394,7 +394,7 @@ class _PlayerLiveState extends State<PlayerLive> with TickerProviderStateMixin {
                 Row(
                   children: [
                     Text(
-                      "${speed.toStringAsFixed(1)}",
+                      speed.toStringAsFixed(1),
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,

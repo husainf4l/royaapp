@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/player_analysis.dart';
 
 class MatchAnalysisScreen extends StatefulWidget {
-  const MatchAnalysisScreen({Key? key}) : super(key: key);
+  const MatchAnalysisScreen({super.key});
 
   @override
   State<MatchAnalysisScreen> createState() => _MatchAnalysisScreenState();

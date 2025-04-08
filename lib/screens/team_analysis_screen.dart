@@ -4,8 +4,7 @@ import '../models/player_analysis.dart';
 class TeamAnalysisScreen extends StatefulWidget {
   final String teamName;
 
-  const TeamAnalysisScreen({Key? key, required this.teamName})
-    : super(key: key);
+  const TeamAnalysisScreen({super.key, required this.teamName});
 
   @override
   State<TeamAnalysisScreen> createState() => _TeamAnalysisScreenState();
@@ -63,9 +62,7 @@ class _TeamAnalysisScreenState extends State<TeamAnalysisScreen> {
                   const SizedBox(height: 8),
 
                   // Players list
-                  ..._teamPlayers
-                      .map((player) => _buildPlayerCard(player))
-                      .toList(),
+                  ..._teamPlayers.map((player) => _buildPlayerCard(player)),
                 ],
               ),
     );

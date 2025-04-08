@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'ar_player_analysis_screen.dart';
+import '../widgets/ar_player_analysis_screen.dart';
 
 class AICommentatorSettingsScreen extends StatelessWidget {
   const AICommentatorSettingsScreen({super.key});

@@ -8,11 +8,11 @@ class CameraControlsWidget extends StatefulWidget {
   final bool isProcessing;
 
   const CameraControlsWidget({
-    Key? key,
+    super.key,
     required this.cameraService,
     required this.onCapture,
     this.isProcessing = false,
-  }) : super(key: key);
+  });
 
   @override
   State<CameraControlsWidget> createState() => _CameraControlsWidgetState();
@@ -20,8 +20,8 @@ class CameraControlsWidget extends StatefulWidget {
 
 class _CameraControlsWidgetState extends State<CameraControlsWidget> {
   double _currentZoom = 1.0;
-  double _minZoom = 1.0;
-  double _maxZoom = 5.0;
+  final double _minZoom = 1.0;
+  final double _maxZoom = 5.0;
 
   @override
   Widget build(BuildContext context) {

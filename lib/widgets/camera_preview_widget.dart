@@ -7,10 +7,10 @@ class CameraPreviewWidget extends StatelessWidget {
   final Function(Offset) onFocusTap;
 
   const CameraPreviewWidget({
-    Key? key,
+    super.key,
     required this.cameraService,
     required this.onFocusTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

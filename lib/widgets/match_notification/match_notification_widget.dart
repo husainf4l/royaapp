@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MatchNotificationWidget extends StatelessWidget {
-  const MatchNotificationWidget({Key? key}) : super(key: key);
+  const MatchNotificationWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -228,7 +228,7 @@ class MatchNotificationWidget extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
-                child: Container(
+                child: SizedBox(
                   height: 8,
                   child: Row(
                     children: [

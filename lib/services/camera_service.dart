@@ -181,16 +181,23 @@ class CameraService {
   Future<XFile?> takePicture() async {
     if (!_isInitialized || _controller == null) {
       if (_isMockMode) {
-        // Return mock image path in mock mode
         // In a real app, you could use a predefined test image
-        print('Taking mock picture');
+        print('Taking mock picture for webhook testing');
         return null;
       }
       return null;
     }
 
     try {
-      return await _controller!.takePicture();
+      final XFile image = await _controller!.takePicture();
+      print('Picture taken: ${image.path}');
+
+      // Get file size for logging
+      final File file = File(image.path);
+      final int fileSize = await file.length();
+      print('Image size: ${(fileSize / 1024).toStringAsFixed(2)} KB');
+
+      return image;
     } catch (e) {
       print('Error taking picture: $e');
       return null;

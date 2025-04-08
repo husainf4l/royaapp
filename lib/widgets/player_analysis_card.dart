@@ -8,10 +8,10 @@ class PlayerAnalysisCard extends StatefulWidget {
   final VoidCallback onClose;
 
   const PlayerAnalysisCard({
-    Key? key,
+    super.key,
     required this.playerAnalysis,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   State<PlayerAnalysisCard> createState() => _PlayerAnalysisCardState();

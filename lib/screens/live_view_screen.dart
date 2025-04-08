@@ -87,14 +87,12 @@ class LiveViewScreen extends StatelessWidget {
 
                 // Stadium spots list
                 const SizedBox(height: 16),
-                ...stadiumSpots
-                    .map(
-                      (spot) => Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: StadiumSpotCard(spot: spot),
-                      ),
-                    )
-                    .toList(),
+                ...stadiumSpots.map(
+                  (spot) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: StadiumSpotCard(spot: spot),
+                  ),
+                ),
 
                 const SizedBox(height: 16),
               ],
@@ -109,7 +107,7 @@ class LiveViewScreen extends StatelessWidget {
 class StadiumSpotCard extends StatelessWidget {
   final StadiumSpot spot;
 
-  const StadiumSpotCard({Key? key, required this.spot}) : super(key: key);
+  const StadiumSpotCard({super.key, required this.spot});
 
   @override
   Widget build(BuildContext context) {
