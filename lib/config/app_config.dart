@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String baseUrl = 'http://192.168.1.101:4001';
+  static const String baseUrl = 'http://192.168.1.110:4001';
   static const String apiUrl = '$baseUrl/auth';
 
   // Webhook configuration

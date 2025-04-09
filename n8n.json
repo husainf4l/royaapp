@@ -1,0 +1,244 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "roya34-upload",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "31cb5458-8905-469f-b95c-c4c784ff2025",
+      "name": "Receive Upload",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        60
+      ],
+      "webhookId": "d355cfd2-fe27-4ccb-acde-ef2dd5dd31a0"
+    },
+    {
+      "parameters": {
+        "jsCode": "const base64Image = $input.first().json.body.file;\n\nconst item = {\n  json: {\n    message: \"Image prepared for next steps\",\n  },\n  binary: {\n    image: {\n      data: base64Image,\n      mimeType: \"image/jpeg\",\n      fileName: \"player.jpg\",\n    },\n  },\n};\n\nreturn [item];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        60
+      ],
+      "id": "4c6a4942-498e-40b5-9279-c655e04ea967",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "Extract the outfit colors , number if available ",
+        "inputType": "base64",
+        "binaryPropertyName": "=image",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        280,
+        60
+      ],
+      "id": "45378407-fc97-4ed6-8814-3bc9c4d4a409",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "YjoFluo0I0YFuFZd",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=this picture is from {{ $('Receive Upload').item.json.body.matchData.status }} match between {{ $('Receive Upload').item.json.body.matchData.homeTeam }} and {{ $('Receive Upload').item.json.body.matchData.awayTeam }} at {{ $('Receive Upload').item.json.body.matchData.stadium }} after analysing the picture to get the putfet and player number \n\n{{ $json.content }}\n\nsend me back who is the team and player number",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "c56df893-e28d-466e-8422-80e9c37c5707",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        600,
+        60
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "b7cd297f-dccc-48dc-a6ab-aee93827d2ac",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        380,
+        400
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "YjoFluo0I0YFuFZd",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"data\": {\n    \"playerNumber\": {{ $json.output.playerNumber }},\n    \"team\": \"{{ $json.output.team }}\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        980,
+        60
+      ],
+      "id": "fa7afe6e-cc95-4317-bd6c-3e9a4463cade",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "1"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        400
+      ],
+      "id": "7dc3e6b6-9a01-4a1a-bdce-7ca43de69e3f",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "1AWE00ETcFWMXWNP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"playerNumber\": 2,\n\t\"team\": \"السعودية\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        860,
+        380
+      ],
+      "id": "ccc929ce-fdab-4920-a395-3b6e8db3d46e",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Upload": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1fbda864-fbb9-4a9a-92e7-fd066347ecc4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bf9d3bb9702d92529852b84239fdba345859a8c5965894de958c01656aa3dc57"
+  },
+  "id": "H6yhSVXHLPSFZHVo",
+  "tags": []
+}
