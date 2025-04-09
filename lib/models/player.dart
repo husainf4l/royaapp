@@ -1,3 +1,5 @@
+import 'package:royaapp/models/player_analysis.dart';
+
 import 'player_performance.dart';
 import 'live_player.dart';
 import 'player_moment.dart';
@@ -9,7 +11,7 @@ class Player {
   String position;
   String team;
   String nationality;
-  List<PlayerPerformance2> performances;
+  List<PlayerAnalysis> performances;
   LivePlayer? livePlayer;
   List<PlayerMoment> playerMoments;
   String? imageUrl;
@@ -36,25 +38,35 @@ class Player {
   factory Player.fromJson(Map<String, dynamic> json) => Player(
     id: json['id'],
     name: json['name'],
-    number: json['number'],
-    position: json['position'],
-    team: json['team'],
-    nationality: json['nationality'],
+    number: json['number'] ?? 0,
+    position: json['position'] ?? '',
+    team: json['team'] ?? '',
+    nationality: json['nationality'] ?? '',
     performances:
-        (json['performances'] as List)
-            .map((e) => PlayerPerformance2.fromJson(e))
-            .toList(),
+        json['performances'] != null
+            ? (json['performances'] as List)
+                .map((e) => PlayerAnalysis.fromJson(e))
+                .toList()
+            : [],
     livePlayer:
         json['livePlayer'] != null
             ? LivePlayer.fromJson(json['livePlayer'])
             : null,
     playerMoments:
-        (json['playerMoments'] as List)
-            .map((e) => PlayerMoment.fromJson(e))
-            .toList(),
+        json['playerMoments'] != null
+            ? (json['playerMoments'] as List)
+                .map((e) => PlayerMoment.fromJson(e))
+                .toList()
+            : [],
     imageUrl: json['imageUrl'],
-    createdAt: DateTime.parse(json['createdAt']),
-    updatedAt: DateTime.parse(json['updatedAt']),
+    createdAt:
+        json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'])
+            : DateTime.now(),
+    updatedAt:
+        json['updatedAt'] != null
+            ? DateTime.parse(json['updatedAt'])
+            : DateTime.now(),
     embedding:
         json['embedding'] != null ? List<int>.from(json['embedding']) : null,
   );
@@ -66,7 +78,6 @@ class Player {
     'position': position,
     'team': team,
     'nationality': nationality,
-    'performances': performances.map((e) => e.toJson()).toList(),
     'livePlayer': livePlayer?.toJson(),
     'playerMoments': playerMoments.map((e) => e.toJson()).toList(),
     'imageUrl': imageUrl,

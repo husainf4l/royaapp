@@ -15,4 +15,16 @@ class LivePlayerService {
       throw Exception('Failed to load live players');
     }
   }
+
+  Future<List<dynamic>> fetchAllPlayers() async {
+    final response = await http.get(
+      Uri.parse('${AppConfig.baseUrl}/live-players'),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load live players');
+    }
+  }
 }
