@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/player_analysis.dart';
 import '../screens/player_detail_screen.dart';
+import '../models/player_analysis.dart';
 
 class AnalysisHistoryScreen extends StatefulWidget {
   const AnalysisHistoryScreen({super.key});

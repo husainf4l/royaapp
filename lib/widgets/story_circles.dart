@@ -56,7 +56,7 @@ class _StoryCirclesState extends State<StoryCircles> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PlayerLive(storyIndex: index),
+                builder: (context) => PlayerLive(storyIndex: 1),
               ),
             );
           },

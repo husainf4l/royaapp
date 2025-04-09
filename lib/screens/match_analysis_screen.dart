@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/player_analysis.dart';
 
 class MatchAnalysisScreen extends StatefulWidget {
   const MatchAnalysisScreen({super.key});

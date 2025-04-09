@@ -6,7 +6,7 @@ import 'package:royaapp/config/app_config.dart'; // Import the configuration
 class LivePlayerService {
   Future<List<dynamic>> fetchLivePlayers() async {
     final response = await http.get(
-      Uri.parse('${AppConfig.baseUrl}/live-players'),
+      Uri.parse('${AppConfig.baseUrl}/live-players/active'),
     );
 
     if (response.statusCode == 200) {

@@ -8,8 +8,28 @@ class PlayerAnalysis {
   final List<MatchPerformance>? recentMatches;
   final String? teamName;
   final String? nationality;
-  final int? jerseyNumber;
+  final int? number;
+  final String? position;
   final Map<String, double>? heatmapData;
+  final String? heatmapUrl;
+  final List<int>? embedding;
+
+  // New fields based on received data
+  final double? topSpeed;
+  final double? avgSpeed;
+  final double? distanceKm;
+  final int? sprintCount;
+  final int? accelerations;
+  final int? passesCompleted;
+  final int? shotsOnTarget;
+  final int? interceptions;
+  final int? tackles;
+  final int? heartRateAvg;
+  final int? heartRateMax;
+  final double? bodyTempC;
+  final double? fatigueScore;
+  final double? staminaScore;
+  final List<Map<String, dynamic>>? positionLog;
 
   PlayerAnalysis({
     required this.playerName,
@@ -21,13 +41,40 @@ class PlayerAnalysis {
     this.recentMatches,
     this.teamName,
     this.nationality,
-    this.jerseyNumber,
+    this.number,
+    this.position,
     this.heatmapData,
+    this.heatmapUrl,
+    this.embedding,
+    this.topSpeed,
+    this.avgSpeed,
+    this.distanceKm,
+    this.sprintCount,
+    this.accelerations,
+    this.passesCompleted,
+    this.shotsOnTarget,
+    this.interceptions,
+    this.tackles,
+    this.heartRateAvg,
+    this.heartRateMax,
+    this.bodyTempC,
+    this.fatigueScore,
+    this.staminaScore,
+    this.positionLog,
   });
 
+  // For backward compatibility
+  int? get jerseyNumber => number;
+
   factory PlayerAnalysis.fromJson(Map<String, dynamic> json) {
+    // Check if we have the new API response format with player and performance objects
+    if (json.containsKey('player') && json.containsKey('performance')) {
+      return PlayerAnalysis.fromServerJson(json);
+    }
+
+    // Legacy/mock format parsing
     return PlayerAnalysis(
-      playerName: json['playerName'] ?? 'Unknown Player',
+      playerName: json['playerName'] ?? 'Unknown',
       physicalCondition: json['physicalCondition'] ?? 'Unknown',
       tacticalRole: json['tacticalRole'] ?? 'Unknown',
       videoReplayLinks:
@@ -35,6 +82,10 @@ class PlayerAnalysis {
               ? List<String>.from(json['videoReplayLinks'])
               : null,
       playerImageUrl: json['playerImageUrl'],
+      teamName: json['teamName'],
+      nationality: json['nationality'],
+      number: json['jerseyNumber'] ?? json['number'],
+      position: json['position'],
       statistics:
           json['statistics'] != null
               ? PlayerStatistics.fromJson(json['statistics'])
@@ -42,16 +93,77 @@ class PlayerAnalysis {
       recentMatches:
           json['recentMatches'] != null
               ? (json['recentMatches'] as List)
-                  .map((m) => MatchPerformance.fromJson(m))
+                  .map((e) => MatchPerformance.fromJson(e))
                   .toList()
               : null,
-      teamName: json['teamName'],
-      nationality: json['nationality'],
-      jerseyNumber: json['jerseyNumber'],
       heatmapData:
           json['heatmapData'] != null
               ? Map<String, double>.from(json['heatmapData'])
               : null,
+    );
+  }
+
+  factory PlayerAnalysis.fromServerJson(Map<String, dynamic> json) {
+    final player = json['player'];
+    final performance = json['performance'];
+
+    // Determine physical condition based on fatigue score
+    String physicalCondition = 'Normal';
+    if (performance['fatigueScore'] != null) {
+      double fatigue = performance['fatigueScore'].toDouble();
+      if (fatigue < 0.3)
+        physicalCondition = 'Excellent';
+      else if (fatigue < 0.6)
+        physicalCondition = 'Good';
+      else if (fatigue < 0.8)
+        physicalCondition = 'Normal';
+      else
+        physicalCondition = 'Tired';
+    }
+
+    return PlayerAnalysis(
+      playerName: player['name'] ?? 'Unknown',
+      physicalCondition: physicalCondition,
+      tacticalRole: player['position'] ?? 'Unknown',
+      playerImageUrl: player['imageUrl'],
+      teamName: player['team'],
+      nationality: player['nationality'],
+      number: player['number'],
+      position: player['position'],
+      embedding:
+          player['embedding'] != null
+              ? List<int>.from(player['embedding'])
+              : null,
+      heatmapUrl: performance['heatmapUrl'],
+
+      // New performance metrics
+      topSpeed: performance['topSpeed']?.toDouble(),
+      avgSpeed: performance['avgSpeed']?.toDouble(),
+      distanceKm: performance['distanceKm']?.toDouble(),
+      sprintCount: performance['sprintCount'],
+      accelerations: performance['accelerations'],
+      passesCompleted: performance['passesCompleted'],
+      shotsOnTarget: performance['shotsOnTarget'],
+      interceptions: performance['interceptions'],
+      tackles: performance['tackles'],
+      heartRateAvg: performance['heartRateAvg'],
+      heartRateMax: performance['heartRateMax'],
+      bodyTempC: performance['bodyTempC']?.toDouble(),
+      fatigueScore: performance['fatigueScore']?.toDouble(),
+      staminaScore: performance['staminaScore']?.toDouble(),
+      positionLog:
+          performance['positionLog'] != null
+              ? List<Map<String, dynamic>>.from(performance['positionLog'])
+              : null,
+
+      // Create statistics object for compatibility with existing code
+      statistics: PlayerStatistics(
+        shotsOnTarget: performance['shotsOnTarget']?.toDouble() ?? 0.0,
+        fatigueScore: performance['fatigueScore']?.toDouble(),
+        staminaScore: performance['staminaScore']?.toDouble(),
+        // Add reasonable defaults for legacy fields
+        minutesPlayed: 90,
+      ),
     );
   }
 
@@ -186,10 +298,11 @@ class PlayerAnalysis {
       playerImageUrl: player['image'] as String?,
       teamName: player['team'] as String?,
       nationality: player['nationality'] as String?,
-      jerseyNumber: player['number'] as int?,
+      number: player['number'] as int?,
       statistics: player['stats'] as PlayerStatistics?,
       recentMatches: player['matches'] as List<MatchPerformance>?,
       heatmapData: player['heatmap'] as Map<String, double>?,
+      embedding: null, // Added embedding field
     );
   }
 }
@@ -203,6 +316,8 @@ class PlayerStatistics {
   final double passAccuracy;
   final double shotsOnTarget;
   final int minutesPlayed;
+  final double? fatigueScore; // Added to align with schema
+  final double? staminaScore; // Added to align with schema
 
   PlayerStatistics({
     this.goals = 0,
@@ -213,6 +328,8 @@ class PlayerStatistics {
     this.passAccuracy = 0.0,
     this.shotsOnTarget = 0.0,
     this.minutesPlayed = 0,
+    this.fatigueScore, // Added to constructor
+    this.staminaScore, // Added to constructor
   });
 
   factory PlayerStatistics.fromJson(Map<String, dynamic> json) {
@@ -225,6 +342,8 @@ class PlayerStatistics {
       passAccuracy: json['passAccuracy']?.toDouble() ?? 0.0,
       shotsOnTarget: json['shotsOnTarget']?.toDouble() ?? 0.0,
       minutesPlayed: json['minutesPlayed'] ?? 0,
+      fatigueScore: json['fatigueScore']?.toDouble(), // Added parsing
+      staminaScore: json['staminaScore']?.toDouble(), // Added parsing
     );
   }
 }

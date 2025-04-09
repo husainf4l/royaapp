@@ -10,7 +10,7 @@ class PlayerDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(player.playerName),
+        title: Text("player.playerName"),
         backgroundColor: Colors.blueGrey[900],
       ),
       body: SingleChildScrollView(

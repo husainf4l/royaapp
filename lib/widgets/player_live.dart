@@ -26,7 +26,7 @@ class _PlayerLiveState extends State<PlayerLive> with TickerProviderStateMixin {
     super.initState();
     try {
       _controller = VideoPlayerController.asset(
-          'assets/images/1.mp4', // Ensure this path is correct
+          'assets/images/${widget.storyIndex}.mp4',
         )
         ..initialize()
             .then((_) {

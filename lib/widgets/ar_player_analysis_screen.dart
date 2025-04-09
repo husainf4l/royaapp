@@ -1,16 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:royaapp/screens/settings_screen.dart';
 import 'package:royaapp/services/analysis_service.dart';
 import '../config/app_config.dart';
-import 'package:royaapp/screens/player_detail_screen.dart';
 import '../services/camera_service.dart';
 import 'camera_preview_widget.dart';
 import 'camera_controls_widget.dart';
 import 'player_analysis_card.dart';
 import '../models/player_analysis.dart';
-import '../screens/analysis_history_screen.dart';
 
 class ARPlayerAnalysisScreen extends StatefulWidget {
   const ARPlayerAnalysisScreen({super.key});
@@ -25,9 +22,7 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
   final AnalysisService _analysisService = AnalysisService();
 
   bool _isLoading = false;
-  bool _isFlashing = false;
   PlayerAnalysis? _playerAnalysis;
-  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -35,7 +30,6 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
     WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
 
-    // Set to fullscreen immersive mode
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
@@ -44,9 +38,7 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
     await _cameraService.initialize();
     setState(() => _isLoading = false);
 
-    // If camera failed to initialize, show error
     if (_cameraService.isMockMode && _cameraService.errorMessage != null) {
-      // Delay to ensure the UI is ready
       Future.delayed(const Duration(milliseconds: 500), () {
         _showCameraError(_cameraService.errorMessage!);
       });
@@ -107,40 +99,6 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
 
     setState(() => _isLoading = true);
 
-    if (_cameraService.isMockMode) {
-      // Add haptic feedback for better user experience
-      HapticFeedback.mediumImpact();
-
-      // Show a brief flash effect to simulate taking a photo
-      setState(() => _isFlashing = true);
-      await Future.delayed(const Duration(milliseconds: 200));
-      setState(() => _isFlashing = false);
-
-      // Simulate processing delay with variable time
-      await Future.delayed(
-        Duration(milliseconds: 800 + (DateTime.now().millisecond % 500)),
-      );
-
-      // Get mock data - use more varied mock data if available
-      final analysis = PlayerAnalysis.mockData();
-
-      if (mounted) {
-        setState(() {
-          _playerAnalysis = analysis;
-          _isLoading = false;
-        });
-
-        // Add a notification toast to indicate demo mode
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Demo mode: Image sent to n8n webhook'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-      return;
-    }
-
     final imageFile = await _cameraService.takePicture();
     if (imageFile == null) {
       setState(() => _isLoading = false);
@@ -152,7 +110,7 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
       return;
     }
 
-    // Show sending notification
+    // Show "sending" notification
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -172,37 +130,25 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
       );
     }
 
-    // Send to server
-    final webhookSuccess = await _analysisService.sendImageToServer(
+    // Call the backend
+    final analysis = await _analysisService.sendImageToServer(
       File(imageFile.path),
     );
 
-    // Show result notification
-    if (mounted && webhookSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(width: 12),
-              Text('Webhook received image successfully'),
-            ],
-          ),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-
-    // Send via HTTP and get analysis
-    final analysis = await _analysisService.sendImageViaHttp(
-      File(imageFile.path),
-    );
-
-    if (mounted) {
-      setState(() {
-        _playerAnalysis = analysis;
-        _isLoading = false; // Fixed parenthesis here
-      });
+    // ✅ Correct place for this:
+    if (analysis != null && mounted) {
+      try {
+        final playerAnalysis = PlayerAnalysis.fromServerJson(analysis);
+        setState(() {
+          _playerAnalysis = playerAnalysis;
+          _isLoading = false;
+        });
+      } catch (e) {
+        print('Parsing error: $e');
+        setState(() => _isLoading = false);
+      }
+    } else {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -216,54 +162,68 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
     _cameraService.setFocusPoint(position);
   }
 
-  void _showDebugMenu() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Debug Menu'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.bug_report),
-                  title: const Text('Test Navigation'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Open Mock Player Detail'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    final mockPlayer = PlayerAnalysis.mockData();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder:
-                            (context) => PlayerDetailScreen(player: mockPlayer),
-                      ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.link),
-                  title: const Text('Set Webhook URL'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showWebhookDialog();
-                  },
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Close'),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-    );
+  // void _showDebugMenu() {
+  //   showDialog(
+  //     context: context,
+  //     builder:
+  //         (context) => AlertDialog(
+  //           title: const Text('Debug Menu'),
+  //           content: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               ListTile(
+  //                 leading: const Icon(Icons.bug_report),
+  //                 title: const Text('Test Navigation'),
+  //                 onTap: () {
+  //                   Navigator.pop(context);
+  //                 },
+  //               ),
+  //               ListTile(
+  //                 leading: const Icon(Icons.person),
+  //                 title: const Text('Open Mock Player Detail'),
+  //                 onTap: () {
+  //                   Navigator.pop(context);
+  //                   final mockPlayer = PlayerAnalysis.mockData();
+  //                   Navigator.of(context).push(
+  //                     MaterialPageRoute(
+  //                       builder:
+  //                           (context) => PlayerDetailScreen(player: mockPlayer),
+  //                     ),
+  //                   );
+  //                 },
+  //               ),
+  //               ListTile(
+  //                 leading: const Icon(Icons.link),
+  //                 title: const Text('Set Webhook URL'),
+  //                 onTap: () {
+  //                   Navigator.pop(context);
+  //                   _showWebhookDialog();
+  //                 },
+  //               ),
+  //               ListTile(
+  //                 leading: const Icon(Icons.center_focus_strong),
+  //                 title: const Text('Reset Camera Focus'),
+  //                 onTap: () {
+  //                   Navigator.pop(context);
+  //                   _resetCameraFocus();
+  //                 },
+  //               ),
+  //             ],
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               child: const Text('Close'),
+  //               onPressed: () => Navigator.pop(context),
+  //             ),
+  //           ],
+  //         ),
+  //   );
+  // }
+
+  void _resetCameraFocus() {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Camera focus reset')));
   }
 
   void _showWebhookDialog() {
@@ -356,10 +316,6 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
               child: const Center(child: CircularProgressIndicator()),
             ),
 
-          // Add flash overlay
-          if (_isFlashing)
-            Positioned.fill(child: Container(color: Colors.white)),
-
           // Camera controls at bottom
           Positioned(
             left: 0,
@@ -396,49 +352,46 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      // bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  Widget _buildBottomNavigationBar() {
-    // Only show bottom nav when player analysis is present
-    if (_playerAnalysis != null) {
-      return BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        backgroundColor: Colors.black87,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.white54,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.camera), label: 'Analysis'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+  // Widget _buildBottomNavigationBar() {
+  //   // Only show bottom nav when player analysis is present
+  //   if (_playerAnalysis != null) {
+  //     return BottomNavigationBar(
+  //       currentIndex: _selectedIndex,
+  //       backgroundColor: Colors.black87,
+  //       selectedItemColor: Colors.blue,
+  //       unselectedItemColor: Colors.white54,
+  //       items: const [
+  //         BottomNavigationBarItem(icon: Icon(Icons.camera), label: 'Analysis'),
+  //         BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
+  //         BottomNavigationBarItem(
+  //           icon: Icon(Icons.settings),
+  //           label: 'Settings',
+  //         ),
+  //       ],
+  //       onTap: (index) {
+  //         setState(() {
+  //           _selectedIndex = index;
+  //         });
 
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AnalysisHistoryScreen(),
-              ),
-            );
-          } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            );
-          }
-        },
-      );
-    }
-    return const SizedBox.shrink(); // Hide when in camera mode
-  }
+  //         if (index == 1) {
+  //           Navigator.push(
+  //             context,
+  //             MaterialPageRoute(
+  //               builder: (context) => const AnalysisHistoryScreen(),
+  //             ),
+  //           );
+  //         } else {
+  //           print("object");
+  //         }
+  //       },
+  //     );
+  //   }
+  //   return const SizedBox.shrink();
+  // }
 
   Widget _buildMockCameraView() {
     return Container(
@@ -454,41 +407,42 @@ class _ARPlayerAnalysisScreenState extends State<ARPlayerAnalysisScreen>
             ),
           ),
 
-          // Demo mode indicator
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  'DEMO MODE',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // // Demo mode indicator
+          // Positioned(
+          //   top: MediaQuery.of(context).padding.top + 20,
+          //   left: 0,
+          //   right: 0,
+          //   child: Center(
+          //     child: Container(
+          //       padding: const EdgeInsets.symmetric(
+          //         horizontal: 16,
+          //         vertical: 8,
+          //       ),
+          //       decoration: BoxDecoration(
+          //         color: Colors.amber.withOpacity(0.8),
+          //         borderRadius: BorderRadius.circular(20),
+          //       ),
+          //       child: const Text(
+          //         'DEMO MODE',
+          //         style: TextStyle(
+          //           fontWeight: FontWeight.bold,
+          //           color: Colors.black,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
 
           // Debug button
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 20,
-            right: 20,
-            child: IconButton(
-              icon: const Icon(Icons.bug_report, color: Colors.white),
-              onPressed: _showDebugMenu,
-            ),
-          ),
+          // Positioned(
+          //   top: MediaQuery.of(context).padding.top + 20,
+          //   right: 20,
+          //   child: IconButton(
+          //     icon: const Icon(Icons.bug_report, color: Colors.white),
+          //     onPressed: () {},
+          //     //_showDebugMenu,
+          //   ),
+          // ),
 
           // Hint text
           Positioned(

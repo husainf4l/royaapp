@@ -8,8 +8,10 @@ class StadiumSpot {
   final String description;
   final String imageUrl;
   final bool isVIP;
+  final int id;
 
   StadiumSpot({
+    required this.id,
     required this.title,
     required this.description,
     required this.imageUrl,
@@ -23,12 +25,14 @@ class LiveViewScreen extends StatelessWidget {
   // List of available stadium spots (will be fetched from API later)
   final List<StadiumSpot> stadiumSpots = [
     StadiumSpot(
+      id: 11,
       title: "الجانب الشمالي",
       description: "إطلالة مميزة على كامل الملعب",
       imageUrl:
           "https://images.unsplash.com/photo-1563299796-b729d0af54a5?q=80&w=1925&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ),
     StadiumSpot(
+      id: 12,
       title: "المقصورة الرئيسية",
       description: "أفضل مشاهدة للمباراة",
       imageUrl:
@@ -36,12 +40,14 @@ class LiveViewScreen extends StatelessWidget {
       isVIP: true,
     ),
     StadiumSpot(
+      id: 13,
       title: "خلف المرمى",
       description: "شاهد تسجيل الأهداف من قرب",
       imageUrl:
           "https://images.unsplash.com/photo-1563299796-b729d0af54a5?q=80&w=1925&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ),
     StadiumSpot(
+      id: 14,
       title: "الجانب الجنوبي",
       description: "بجانب مشجعي الفريق",
       imageUrl:
@@ -116,8 +122,11 @@ class StadiumSpotCard extends StatelessWidget {
         // Navigate to PlayerLive screen
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PlayerLive(storyIndex: 1)),
+          MaterialPageRoute(
+            builder: (context) => PlayerLive(storyIndex: spot.id),
+          ),
         );
+        print(spot.id);
       },
       child: Container(
         width: double.infinity,
@@ -244,9 +253,11 @@ class StadiumSpotCard extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => PlayerLive(storyIndex: 12),
+                              builder:
+                                  (context) => PlayerLive(storyIndex: spot.id),
                             ),
                           );
+                          print(spot.id);
                         },
                         icon: const Icon(Icons.videocam),
                         label: const Text('مشاهدة البث'),
